@@ -22,6 +22,7 @@ in the debugger and orient yourself within these frameworks.
 
 # Lifting the Lid: Unit Testing Frameworks (Annotations and Reflection)
 
+## A Custom Solution
 
 Once upon a time, there was a programmer who decided today was a good day to write a Java calculator application (it was 
 overcast with a westerly breeze). Keen to expand their craft, this time they decided to practice Test 
@@ -91,7 +92,7 @@ However, the programmer was frustrated. The calculator was going well and the te
 but the test runner was a mess. With so much repeated code and running the tests requiring more lines of code than to specify them
 something had to change.
 
-## Reflection
+### Reflection
 
 Luckily, the programmer had recently been browsing the [Java Reflection Tutorial](https://docs.oracle.com/javase/tutorial/reflect/index.html)
 and understood that the Reflection API allows the caller to examine properties of classes, their methods, fields etc
@@ -151,17 +152,17 @@ this wasn't a very flexible scheme and the programmer wasn't sure they liked the
 names. 
 
 
-## Annotations to the Rescue
+### Annotations to the Rescue
 - Add Test Annotation
 
-## A Generic Test Runner 
+### A Generic Test Runner 
 - use forName to initialise the test class
 - demonstrate that no compile time reference so can be moved out of the source set
 
-## Removing repetition
+### Removing repetition
 - remove need for public on the test methods
 
-## The logical conclusion
+### The logical conclusion
 Talk a bit about BeforeEach/All and other common test framework features and how they could be implemented
 abstrations for test and results to allow them to be displayed in different ways etc
 
