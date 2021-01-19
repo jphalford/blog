@@ -414,7 +414,7 @@ public class IntCalculatorFirstAnnotationTest {
 
 
 
-## Epilogue
+### Epilogue
 
 As the days wore on, the programmer became obsessed with writing a fully featured test framework:
 - defining `@Before` and `@After` annotations and using the same techniques as above to 
@@ -429,10 +429,109 @@ With these features complete, they confidently proclaimed that this was indeed a
 
 ## JUnit 5
 
-Now that we have covered the basics of writing a test framework let's take a short look at a common java framework: JUnit 5
+Now we have covered the basics of writing a test framework let's take a short look at a common java framework: JUnit 5.
 
-- stack trace of a running test, walk up show similar areas
+One way to explore frameworks is using breakpoints in your application code. When triggered, you will
+be able to use the stacktrace to explore the framework code that is invoking your application function. 
 
+Since the framework in question is JUnit 5, let's place a breakpoint in a test from a recent project (I would encourage 
+you to try the same). In a recent [Advent of Code](https://github.com/jphalford/advent-of-code) project, I get the following (the breakpoint is [here](https://github.com/jphalford/advent-of-code/blob/main/src/test/java/com/jphalford/aoc/day10/Day10Test.java#L57))
+
+```
+part2Example1:58, Day10Test (com.jphalford.aoc.day10)
+invoke0:-1, NativeMethodAccessorImpl (jdk.internal.reflect)
+invoke:62, NativeMethodAccessorImpl (jdk.internal.reflect)
+invoke:43, DelegatingMethodAccessorImpl (jdk.internal.reflect)
+invoke:566, Method (java.lang.reflect)
+invokeMethod:688, ReflectionUtils (org.junit.platform.commons.util)
+proceed:60, MethodInvocation (org.junit.jupiter.engine.execution)
+proceed:131, InvocationInterceptorChain$ValidatingInvocation (org.junit.jupiter.engine.execution)
+...
+invokeTestMethod:206, TestMethodTestDescriptor (org.junit.jupiter.engine.descriptor)
+...
+startRunnerWithArgs:71, JUnit5IdeaTestRunner (com.intellij.junit5)
+startRunnerWithArgs:33, IdeaTestRunner$Repeater (com.intellij.rt.junit)
+prepareStreamsAndStart:220, JUnitStarter (com.intellij.rt.junit)
+main:53, JUnitStarter (com.intellij.rt.junit)
+```
+ 
+Let's look at the first few lines:
+```
+part2Example1:58, Day10Test (com.jphalford.aoc.day10)
+invoke0:-1, NativeMethodAccessorImpl (jdk.internal.reflect)
+invoke:62, NativeMethodAccessorImpl (jdk.internal.reflect)
+invoke:43, DelegatingMethodAccessorImpl (jdk.internal.reflect)
+invoke:566, Method (java.lang.reflect)
+invokeMethod:688, ReflectionUtils (org.junit.platform.commons.util)
+```
+
+On the first line, we have our test method, `part2Example1` and on the bottom, a method from the JUnit framework `invokeMethod`.
+From the trace of the methods in between, it looks like it's using the same `invoke` function from the Java Reflection library that we saw earlier.
+
+Let's look closer at the `invokeMethod` method:
+```java
+/**
+	 * @see org.junit.platform.commons.support.ReflectionSupport#invokeMethod(Method, Object, Object...)
+	 */
+	public static Object invokeMethod(Method method, Object target, Object... args) {
+		Preconditions.notNull(method, "Method must not be null");
+		Preconditions.condition((target != null || isStatic(method)),
+			() -> String.format("Cannot invoke non-static method [%s] on a null target.", method.toGenericString()));
+
+		try {
+			return makeAccessible(method).invoke(target, args);
+		}
+		catch (Throwable t) {
+			throw ExceptionUtils.throwAsUncheckedException(getUnderlyingCause(t));
+		}
+	}
+```
+
+Once we get past the `Preconditions` checks validating the method arguments, the pattern followed by
+our programmer emerges; the method is made accessible, invoked and the `InvocationTargetException` is handled. 
+In the JUnit 5 implementation the responsibility to report the test lies elsewhere in the framework. 
+However, the core principles are the same. 
+
+
+
+```
+invokeTestMethod:206, TestMethodTestDescriptor (org.junit.jupiter.engine.descriptor)
+```
+
+```java
+    @Override
+	public JupiterEngineExecutionContext execute(JupiterEngineExecutionContext context,
+			DynamicTestExecutor dynamicTestExecutor) {
+		ThrowableCollector throwableCollector = context.getThrowableCollector();
+
+		// @formatter:off
+		invokeBeforeEachCallbacks(context);
+			if (throwableCollector.isEmpty()) {
+				invokeBeforeEachMethods(context);
+				if (throwableCollector.isEmpty()) {
+					invokeBeforeTestExecutionCallbacks(context);
+					if (throwableCollector.isEmpty()) {
+						invokeTestMethod(context, dynamicTestExecutor);
+					}
+					invokeAfterTestExecutionCallbacks(context);
+				}
+				invokeAfterEachMethods(context);
+			}
+		invokeAfterEachCallbacks(context);
+		// @formatter:on
+
+		return context;
+	}
+```
+
+
+Finally, if we look at the inital main function in the debugger we can see how the test to run was specified
+```
+args = {String[3]@1945}
+       0 = "-ideVersion5"
+       1 = "-junit5"
+       2 = "com.jphalford.aoc.day10.Day10Test,part2Example1"
+```
 
 
 # Other ideas
@@ -448,3 +547,4 @@ Now that we have covered the basics of writing a test framework let's take a sho
     - I think leave to The Classpath - add a teaser
     - use forName + getDeclaredConstructor to initialise the test class
     - demonstrate that no compile time reference so can be moved out of the source set
+    - acutally prob need as it ties in nicely with the final main look
