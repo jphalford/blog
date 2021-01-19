@@ -135,10 +135,10 @@ public class TestRunner {
             String testMethodName = declaredMethod.getName();
             if (testMethodName.startsWith("test")) {
                 // We've found a test method
-+                try {
-+                    declaredMethod.invoke(testInstance);
-+                    System.out.println(String.format("PASSED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
-+                } catch (InvocationTargetException e) {
+                try {
+                    declaredMethod.invoke(testInstance);
+                    System.out.println(String.format("PASSED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
+                } catch (InvocationTargetException e) {
                     if (e.getTargetException() instanceof RuntimeException) {
                         System.out.println(String.format("FAILED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
                     } else {
@@ -158,20 +158,197 @@ public class TestRunner {
 The programmer was a lot happier, now they could add further test methods, and as long as they started
 with the word "test" they would automatically be picked up and run by the test runner. However, there was a problem.
 This wasn't a very flexible scheme and the programmer wasn't sure they liked the repetition of "test" in the test method
-names. 
+names. Instead, it would be much better if there was a way to label the methods as tests. 
 
 
 ### Annotations to the Rescue
-- Add Test Annotation
+
+This sounded familiar, and sure enough after flicking through the Java Tutorials the programmer found the 
+[Annotations](https://docs.oracle.com/javase/tutorial/java/annotations/index.html) section. Annotations are 
+used to provide metadata about the code and can be queried at runtime by an application. So the programmer decided 
+to create a `@Test` annotation to mark the test methods. Then, they could update their code to check for mehtods
+with this annotation rather than starting with the word "test".
+
+Annotations are specified using the `@interface` keyword and can themselves have annotations applied to 
+provide further information. The programmer decided that for now, two annotations were needed
+1. [`@Retention`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/annotation/Retention.html) would
+  be used to specify that the `@Test` annotation should be available at runtime so that the test runner can find the methods.
+1. [`@Target`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/annotation/Target.html) would be used to
+restrict the `@Test` annotation to methods, because the only thing the programmer trusted less than frameworks
+was their future self. This restriction would prevent them from accidentally adding the annotation to a type, constructor, field 
+or [any other places an annotation can be used](https://docs.oracle.com/javase/specs/jls/se11/html/jls-9.html#jls-9.6.4.1).
+
+With that settled, the programmer added the test annotation and set about using it in their tests:
+
+`Test`
+```java
+package org.example.test;
+
+import ...;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Test {
+}
+```
+ 
+`IntCalculatorTest`
+```java
+package org.example.app;
+
+import org.example.test.Test;
+
+public class IntCalculatorFirstAnnotationTest {
+
+    @Test
+    void testSum() {
+        IntCalculator intCalculator = new IntCalculator();
+        assertEquals(2, intCalculator.sum(1, 1));
+    }
+
+    @Test
+    void testMinus() {
+        IntCalculator intCalculator = new IntCalculator();
+        assertEquals(0, intCalculator.minus(1, 1));
+    }
+
+    public void assertEquals(int expected, int actual) {
+        if (expected != actual) {
+            throw new RuntimeException(String.format("%d != %d", 0, actual));
+        }
+    }
+}
+```
+
+Now, it was time to update the test runner. After going back to the [Method Javadoc](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html) 
+the programmer decided that [`isAnnotationPresent()`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/AccessibleObject.html#isAnnotationPresent(java.lang.Class)) 
+could be used to replace the check for a test method:
+
+```java
+public class TestRunner {
+
+    public static void main(String[] args) throws InvocationTargetException {
+        IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
+
+        System.out.println("RUNNING - IntCalculatorFirstAnnotationTest");
+
+        for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
+            String testMethodName = declaredMethod.getName();
+            if (declaredMethod.isAnnotationPresent(Test.class)) {
+                try {
+                    declaredMethod.invoke(testInstance);
+                    System.out.println(String.format("PASSED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
+                } catch (InvocationTargetException e) {
+                    if (e.getTargetException() instanceof RuntimeException) {
+                        System.out.println(String.format("FAILED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+The programmer stood back and admired their work; they were definitely getting somewhere. The test runner was
+almost independent of the test class being run. The only sticking points were the instantiation of `IntCalculatorFirstAnnotationTest` and
+the name of the test class in the RUNNING/PASSED/FAILED test logs.  
+
+Next, since the programmer had used [`Class#getSimpleName()`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html#getSimpleName()) before, they decied to tidy up the test result logging.
+
+```java
+public class TestRunner {
+
+    public static void main(String[] args) throws InvocationTargetException {
+        IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
+
+        final String testClassName = testInstance.getClass().getSimpleName();
+        System.out.println("RUNNING - " + testClassName);
+
+        for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
+            String testMethodName = declaredMethod.getName();
+            if (declaredMethod.isAnnotationPresent(Test.class)) {
+                try {
+                    declaredMethod.invoke(testInstance);
+                    System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
+                } catch (InvocationTargetException e) {
+                    if (e.getTargetException() instanceof RuntimeException) {
+                        System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+Following this refactoring, the programmer could extract the test into two methods to prove that the code they had written
+was independent of `IntCalculatorFirstAnnotationTest`:
+
+```java
+public class TestRunner {
+
+    public static void main(String[] args) throws InvocationTargetException {
+        IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
+
+        runTest(testInstance);
+    }
+
+    private void runTest(Object testInstance) throws InvocationTargetException {
+        final String testClassName = testInstance.getClass().getSimpleName();
+        System.out.println("RUNNING - " + testClassName);
+
+        for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
+            if (declaredMethod.isAnnotationPresent(Test.class)) {
+                runTestMethod(testInstance, testClassName, declaredMethod);
+            }
+        }
+    }
+
+    private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws InvocationTargetException {
+        String testMethodName = declaredMethod.getName();
+        try {
+            declaredMethod.invoke(testInstance);
+            System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
+        } catch (InvocationTargetException e) {
+            if (e.getTargetException() instanceof RuntimeException) {
+                System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
+            } else {
+                throw e;
+            }
+        }
+    }
+
+}
+```
+
+
 
 ### A Generic Test Runner 
+
+> Maybe drop this section
+
+
 - use forName + getDeclaredConstructor to initialise the test class
 - demonstrate that no compile time reference so can be moved out of the source set
+
+
+It was approaching afternoon tea and with the smell of scones heavy in the air the programmer decided to have
+one last look at their tests... 
 
 ### Removing repetition
 - remove need for public on the test methods
 
-### The logical conclusion
+
+
+
+
+## The logical conclusion
+
+
 Talk a bit about BeforeEach/All and other common test framework features and how they could be implemented
 abstrations for test and results to allow them to be displayed in different ways etc
 
@@ -186,3 +363,10 @@ Now that we have covered the basics of writing a test framework let's take a sho
 # Other ideas
 - Dependency Injection
 - Lombok
+- The Classpath
+
+# Q's
+- JLS links or Java tutorial links?
+- How to make changes in code more obvious?
+- Annotation type member example for class name?
+- 

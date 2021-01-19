@@ -5,10 +5,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class TestEngine {
-    public void runTestClass(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    public void runTest(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         Class<?> testClass = Class.forName(className);
         Object testInstance = testClass.getDeclaredConstructor().newInstance();
 
+        runTest(testInstance);
+    }
+
+    private void runTest(Object testInstance) throws IllegalAccessException, InvocationTargetException {
         final String testClassName = testInstance.getClass().getSimpleName();
         System.out.println("RUNNING - " + testClassName);
 
