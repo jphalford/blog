@@ -330,7 +330,6 @@ It was approaching afternoon tea and with the smell of scones heavy in the air t
 one last look at their tests... 
 
 ### Removing repetition
-- remove need for public on the test methods
 
 The programmer couldn't quite put their finger on it but there was something wrong with their tests, they just 
 didn't look "modern".
@@ -344,8 +343,7 @@ didn't look "modern".
 
 In a flash, the programmer saw the problem; access modifiers are so 2006. Surely the gauche `public` modifier could
 be removed. Since the programmer wanted to modify the accessibility of a method they had a look though the [Method Javadoc](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html)
-and discovered a promising method; [Method#setAccessible(boolean)](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html#setAccessible(boolean)).
-from the Javadoc:
+and discovered a promising method; [Method#setAccessible(boolean)](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html#setAccessible(boolean)):
   
 > Set the accessible flag for this reflected object to the indicated boolean value. A value of true indicates that the reflected object should suppress checks for Java language access control when it is used.
 
@@ -419,10 +417,10 @@ public class IntCalculatorFirstAnnotationTest {
 ## Epilogue
 
 As the days wore on, the programmer became obsessed with writing a fully featured test framework:
-- defining @Before and @After annotations and using the same techniques as above to 
+- defining `@Before` and `@After` annotations and using the same techniques as above to 
 annotate, discover and invoke the methods before and after each test.
 - abstracting the test results to support configurable reporting levels and formats.
-- expanding the number of `assert` methods to cover further types.  
+- expanding the number of `assertEquals` methods to cover further types.  
 - discovering all the test classes and running them automatically (this is actually surprisingly 
 difficult in Java and will probably be the subject of a future Lifting the Lid)
 
