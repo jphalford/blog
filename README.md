@@ -5,9 +5,9 @@
 > Lemony Snicket 
 
 A modern Java application is usually a tangle of frameworks whose annotations make even the cleanest code look like the definition of
-nonesense to the casual observer. To exacerbate matters, when the application runs some kind of arcane witchcraft 
-takes place and before you can say "Abracadabra", the application is taking requests, reading messages and shoving things into databases. 
-This wouldn't be a problem, but when it vanishes without so much as an `@Goodbye` the programmer needs to work out what went wrong...
+nonsense to the casual observer. When run, a few lines of code can be transformed into an application that takes requests,  
+deserialises their contents and updates databases. This wouldn't be a problem, but when the application vanishes without so much as an 
+`@Goodbye` the programmer needs to work out what went wrong...
 
 
 > "What I cannot create, I do not understand"
@@ -86,6 +86,12 @@ public class TestRunner {
 }
 ```
 
+`Output`
+```
+RUNNING - IntCalculatorFirstAnnotationTest
+PASSED - IntCalculatorFirstAnnotationTest#testSum
+FAILED - IntCalculatorFirstAnnotationTest#testMinus
+```
 
 However, the programmer was frustrated. The calculator was going well, the test results could be seen in the console, 
 but the test runner was a mess. Running a test and reporting the result required more lines of code than to specify the
@@ -129,10 +135,10 @@ public class TestRunner {
             String testMethodName = declaredMethod.getName();
             if (testMethodName.startsWith("test")) {
                 // We've found a test method
-                try {
-                    declaredMethod.invoke(testInstance);
-                    System.out.println(String.format("PASSED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
-                } catch (InvocationTargetException e) {
++                try {
++                    declaredMethod.invoke(testInstance);
++                    System.out.println(String.format("PASSED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
++                } catch (InvocationTargetException e) {
                     if (e.getTargetException() instanceof RuntimeException) {
                         System.out.println(String.format("FAILED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
                     } else {
