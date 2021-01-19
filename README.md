@@ -29,7 +29,7 @@ overcast with a westerly breeze). Keen to expand their craft, they decided to pr
 
 The programmer was untrusting of others and thought Frameworks were for other people. They decided
 that for their tests, a test would be represented by a method in a test class and would be considered to have 
-passed if no exceptions are thrown when the test method is invoked.  
+passed if no exceptions are thrown when invoking the test method.  
  
 Half an hour later, and the programmer had some basic tests for sum and minus: 
  
@@ -157,7 +157,7 @@ public class TestRunner {
 
 The programmer was a lot happier, now they could add further test methods, and as long as they started
 with the word "test" they would automatically be picked up and run by the test runner. However, there was a problem.
-This wasn't a very flexible scheme and the programmer wasn't sure they liked the repetition of "test" in the test method
+This wasn't a very flexible scheme, and the programmer wasn't sure they liked the repetition of "test" in the test method
 names. Instead, it would be much better if there was a way to label the methods as tests. 
 
 
@@ -332,7 +332,87 @@ one last look at their tests...
 ### Removing repetition
 - remove need for public on the test methods
 
+The programmer couldn't quite put their finger on it but there was something wrong with their tests, they just 
+didn't look "modern".
 
+```java
+    @Test
+    public void testSum() {
+        //...
+    }
+```
+
+In a flash, the programmer saw the problem; access modifiers are so 2006. Surely the gauche `public` modifier could
+be removed. Since the programmer wanted to modify the accessibility of a method they had a look though the [Method Javadoc](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html)
+and discovered a promising method; [Method#setAccessible(boolean)](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html#setAccessible(boolean)).
+from the Javadoc:
+  
+> Set the accessible flag for this reflected object to the indicated boolean value. A value of true indicates that the reflected object should suppress checks for Java language access control when it is used.
+
+
+Sure enough, once the `runTestMethod` was updated to call `declaredMethod.setAccessible(true)`, the public keyword could be
+removed from the tests:
+
+```java
+public class TestRunner {
+
+    public static void main(String[] args) throws InvocationTargetException {
+        IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
+
+        runTest(testInstance);
+    }
+
+    private void runTest(Object testInstance) throws InvocationTargetException {
+       // ...
+    }
+
+    private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws InvocationTargetException {
+        String testMethodName = declaredMethod.getName();
+        try {
+            if (!declaredMethod.canAccess(testInstance)) {
+                declaredMethod.setAccessible(true);
+            }
+            declaredMethod.invoke(testInstance);
+            System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
+        } catch (InvocationTargetException e) {
+            if (e.getTargetException() instanceof RuntimeException) {
+                System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
+            } else {
+                throw e;
+            }
+        }
+    }
+
+}
+```
+
+`IntCalculatorTest`
+```java
+package org.example.app;
+
+import org.example.test.Test;
+
+public class IntCalculatorFirstAnnotationTest {
+
+    @Test
+    void testSum() {
+        IntCalculator intCalculator = new IntCalculator();
+        assertEquals(2, intCalculator.sum(1, 1));
+    }
+
+    @Test
+    void testMinus() {
+        IntCalculator intCalculator = new IntCalculator();
+        assertEquals(0, intCalculator.minus(1, 1));
+    }
+
+    public void assertEquals(int expected, int actual) {
+        if (expected != actual) {
+            throw new RuntimeException(String.format("%d != %d", 0, actual));
+        }
+    }
+}
+```
 
 
 
@@ -342,7 +422,7 @@ As the days wore on, the programmer became obsessed with writing a fully feature
 - defining @Before and @After annotations and using the same techniques as above to 
 annotate, discover and invoke the methods before and after each test.
 - abstracting the test results to support configurable reporting levels and formats.
-- expanding the number of `assert` methods to cover other variable types.  
+- expanding the number of `assert` methods to cover further types.  
 - discovering all the test classes and running them automatically (this is actually surprisingly 
 difficult in Java and will probably be the subject of a future Lifting the Lid)
 
