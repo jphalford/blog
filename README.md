@@ -487,12 +487,12 @@ Let's look closer at the `invokeMethod` method:
 	}
 ```
 
-Once we get past the `Preconditions` checks validating the method arguments, the pattern followed by
+Once we get past the `Preconditions` checks validating the method arguments the pattern followed by
 our programmer emerges; the method is made accessible, invoked and the `InvocationTargetException` is handled. 
 In the JUnit 5 implementation the responsibility to report the test lies elsewhere in the framework. 
 However, the core principles are the same. 
 
-
+Further down the stacktrace, we can find the primary method responsible for running a test:
 
 ```
 invokeTestMethod:206, TestMethodTestDescriptor (org.junit.jupiter.engine.descriptor)
@@ -524,8 +524,12 @@ invokeTestMethod:206, TestMethodTestDescriptor (org.junit.jupiter.engine.descrip
 	}
 ```
 
+Here, you can see the methods annotated with `@Before` being invoked (`invokeBeforeEachMethods()`) prior to the test
+(`invokeTestMethod()`) and finally the (`invokeAfterEachCallbacks`) invoking the methods tagged with `@After`. 
+Looking further in the stacktrace would also reveal the code to process the `@BeforeAll` and `@AfterAll` annotations.
 
-Finally, if we look at the inital main function in the debugger we can see how the test to run was specified
+
+Finally, if we look at the initial main function in the debugger we can see how the test to run was specified:
 ```
 args = {String[3]@1945}
        0 = "-ideVersion5"
@@ -533,6 +537,7 @@ args = {String[3]@1945}
        2 = "com.jphalford.aoc.day10.Day10Test,part2Example1"
 ```
 
+TODO add/link back to forName?
 
 # Other ideas
 - Dependency Injection
