@@ -255,7 +255,7 @@ The programmer stood back and admired their work; they were definitely getting s
 almost independent of the test class being run. The only sticking points were the instantiation of `IntCalculatorFirstAnnotationTest` and
 the name of the test class in the RUNNING/PASSED/FAILED test logs.  
 
-Next, since the programmer had used [`Class#getSimpleName()`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html#getSimpleName()) before, they decied to tidy up the test result logging.
+Next, since the programmer had used [`Class#getSimpleName()`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html#getSimpleName()) before, they decided to tidy up the test result logging.
 
 ```java
 public class TestRunner {
@@ -326,16 +326,6 @@ public class TestRunner {
 ```
 
 
-
-### A Generic Test Runner 
-
-> Maybe drop this section
-
-
-- use forName + getDeclaredConstructor to initialise the test class
-- demonstrate that no compile time reference so can be moved out of the source set
-
-
 It was approaching afternoon tea and with the smell of scones heavy in the air the programmer decided to have
 one last look at their tests... 
 
@@ -346,11 +336,18 @@ one last look at their tests...
 
 
 
-## The logical conclusion
+## Epilogue
 
+As the days wore on, the programmer became obsessed with writing a fully featured test framework:
+- defining @Before and @After annotations and using the same techniques as above to 
+annotate, discover and invoke the methods before and after each test.
+- abstracting the test results to support configurable reporting levels and formats.
+- expanding the number of `assert` methods to cover other variable types.  
+- discovering all the test classes and running them automatically (this is actually surprisingly 
+difficult in Java and will probably be the subject of a future Lifting the Lid)
 
-Talk a bit about BeforeEach/All and other common test framework features and how they could be implemented
-abstrations for test and results to allow them to be displayed in different ways etc
+With these features complete, they confidently proclaimed that this was indeed a superior test library.
+
 
 ## JUnit 5
 
@@ -363,10 +360,13 @@ Now that we have covered the basics of writing a test framework let's take a sho
 # Other ideas
 - Dependency Injection
 - Lombok
-- The Classpath
+- The Classpath (use java cmd directly, maybe construct classpath as per maven/gradle for tests)
 
 # Q's
 - JLS links or Java tutorial links?
 - How to make changes in code more obvious?
 - Annotation type member example for class name?
-- 
+- Generic Test Runner section?
+    - I think leave to The Classpath - add a teaser
+    - use forName + getDeclaredConstructor to initialise the test class
+    - demonstrate that no compile time reference so can be moved out of the source set

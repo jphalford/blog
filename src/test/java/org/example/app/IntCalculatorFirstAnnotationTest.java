@@ -16,7 +16,7 @@ public class IntCalculatorFirstAnnotationTest {
         assertEquals(0, intCalculator.minus(1, 1));
     }
 
-    public void assertEquals(int expected, int actual) {
+    void assertEquals(int expected, int actual) {
         if (expected != actual) {
             throw new RuntimeException(String.format("%d != %d", 0, actual));
         }
