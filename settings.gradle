@@ -1,2 +1,3 @@
 rootProject.name = 'annotations'
 
+include 'lifting-the-lid:annotations'
