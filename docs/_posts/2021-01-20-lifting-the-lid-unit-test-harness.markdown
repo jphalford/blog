@@ -573,8 +573,6 @@ TODO add/link back to forName?
 - The Classpath (use java cmd directly, maybe construct classpath as per maven/gradle for tests)
 
 ## Q's
-- JLS links or Java tutorial links?
-- How to make changes in code more obvious?
 - Annotation type member example for class name?
 - Generic Test Runner section?
     - I think leave to The Classpath - add a teaser
