@@ -45,81 +45,67 @@ diff --git a/IntCalculatorInitialTest.java b/IntCalculatorInitialTest.java
 new file mode 100644
 --- /dev/null                        
 +++ IntCalculatorInitialTest.java       
-@@ -0,0 +1,40 @@
+@@ -0,0 +1,20 @@
 +package org.example.app;
 +
 +public class IntCalculatorInitialTest {
 +
-+    public static void main(String[] args) {
-+        IntCalculatorInitialTest intCalculatorTest = new IntCalculatorInitialTest();
++  public void testSum() {
++    IntCalculator intCalculator = new IntCalculator();
++    assertEquals(2, intCalculator.sum(1, 1));
++  }
 +
-+        System.out.println("IntCalculatorTest");
++  public void testMinus() {
++    IntCalculator intCalculator = new IntCalculator();
++    assertEquals(0, intCalculator.minus(1, 1));
++  }
 +
-+        try {
-+            intCalculatorTest.testSum();
-+            System.out.println("PASSED - IntCalculatorTest#testSum");
-+        } catch (Exception e) {
-+            System.out.println("FAILED - IntCalculatorTest#testSum");
-+        }
-+
-+        try {
-+            intCalculatorTest.testMinus();
-+            System.out.println("PASSED - IntCalculatorTest#testMinus");
-+        } catch (Exception e) {
-+            System.out.println("FAILED - IntCalculatorTest#testMinus");
-+        }
++  public void assertEquals(int expected, int actual) {
++    if (expected != actual) {
++      throw new RuntimeException(String.format("%d != %d", 0, actual));
 +    }
-+
-+    public void testSum() {
-+        IntCalculator intCalculator = new IntCalculator();
-+        assertEquals(2, intCalculator.sum(1, 1));
-+    }
-+
-+    public void testMinus() {
-+        IntCalculator intCalculator = new IntCalculator();
-+        assertEquals(0, intCalculator.minus(1, 1));
-+    }
-+
-+    public void assertEquals(int expected, int actual) {
-+        if (expected != actual) {
-+            throw new RuntimeException(String.format("%d != %d", 0, actual));
-+        }
-+    }
++  }
 +}
-
 ```
 
 Alongside a test runner which would call each test method and print out pass or fail depending on whether the
 test method thew an exception:
-`
-```java
-package org.example.app;
 
-public class TestRunner {
-  public static void main(String[] args) {
-    IntCalculatorInitialTest intCalculatorTest = new IntCalculatorInitialTest();
-    
-        System.out.println("IntCalculatorTest");
-        
-        try {
-            intCalculatorTest.testSum();
-            System.out.println("PASSED - IntCalculatorTest#testSum");
-        } catch (Exception e) {
-            System.out.println("FAILED - IntCalculatorTest#testSum");
-        }
-        
-        try {
-            intCalculatorTest.testMinus();
-            System.out.println("PASSED - IntCalculatorTest#testMinus");
-        } catch (Exception e) {
-            System.out.println("FAILED - IntCalculatorTest#testMinus");
-        }
-    }
-}
+```diff
+diff -uN 00-empty/TestRunner.java 01-initial/TestRunner.java
+new file mode 100644
+--- TestRunner.java    1970-01-01 00:00:00.000000000 +0000
++++ TestRunner.java  2021-01-24 19:02:53.483116100 +0000
+@@ -0,0 +1,23 @@
++package org.example.app;
++
++public class TestRunner {
++  public static void main(String[] args) {
++    IntCalculatorInitialTest intCalculatorTest = new IntCalculatorInitialTest();
++
++    System.out.println("IntCalculatorTest");
++
++    try {
++      intCalculatorTest.testSum();
++      System.out.println("PASSED - IntCalculatorTest#testSum");
++    } catch (Exception e) {
++      System.out.println("FAILED - IntCalculatorTest#testSum");
++    }
++
++    try {
++      intCalculatorTest.testMinus();
++      System.out.println("PASSED - IntCalculatorTest#testMinus");
++    } catch (Exception e) {
++      System.out.println("FAILED - IntCalculatorTest#testMinus");
++    }
++  }
++}
+
 ```
 
+Triggering the test runner, the programmer recieved the following output:
 
-```
+```shell-session
 RUNNING - IntCalculatorFirstAnnotationTest
 PASSED - IntCalculatorFirstAnnotationTest#testSum
 FAILED - IntCalculatorFirstAnnotationTest#testMinus
@@ -155,31 +141,45 @@ would then be used to invoke the test method.
 in the test results
 
 In a jiffy, the test runner was transformed:
-```java
-public class TestRunner {
-    public static void main(String[] args) throws InvocationTargetException {
-        IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
+```diff
+diff -uN 01-initial/TestRunner.java 02-reflection-invoke/TestRunner.java
+--- TestRunner.java  2021-01-24 19:02:53.483116100 +0000
++++ TestRunner.java  2021-01-24 19:10:19.243665900 +0000
+@@ -6,18 +6,21 @@
 
-        System.out.println("RUNNING - IntCalculatorFirstAnnotationTest");
+     System.out.println("IntCalculatorTest");
 
-        for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
-            String testMethodName = declaredMethod.getName();
-            if (testMethodName.startsWith("test")) {
-                // We've found a test method
-                try {
-                    declaredMethod.invoke(testInstance);
-                    System.out.println(String.format("PASSED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
-                } catch (InvocationTargetException e) {
-                    if (e.getTargetException() instanceof RuntimeException) {
-                        System.out.println(String.format("FAILED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
-                    } else {
-                        throw e;
-                    }
-                }
-            }
-        }
-    }
-}
+-    try {
+-      intCalculatorTest.testSum();
+-      System.out.println("PASSED - IntCalculatorTest#testSum");
+-    } catch (Exception e) {
+-      System.out.println("FAILED - IntCalculatorTest#testSum");
+-    }
+-
+-    try {
+-      intCalculatorTest.testMinus();
+-      System.out.println("PASSED - IntCalculatorTest#testMinus");
+-    } catch (Exception e) {
+-      System.out.println("FAILED - IntCalculatorTest#testMinus");
++    for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
++      String testMethodName = declaredMethod.getName();
++      if (testMethodName.startsWith("test")) {
++        // We've found a test method
++        try {
++          declaredMethod.invoke(testInstance);
++          System.out.println(String.format("PASSED - IntCalculatorTest#%s", testMethodName));
++        } catch (InvocationTargetException e) {
++          if (e.getTargetException() instanceof RuntimeException) {
++            System.out.println(String.format("FAILED - IntCalculatorTest#%s", testMethodName));
++          } else {
++            throw e;
++          }
++        }
++      }
+     }
+   }
+ }
+
 ```
 
 > TODO - A brief explainer on InvocationTargetException
@@ -212,71 +212,63 @@ or [any other places an annotation can be used](https://docs.oracle.com/javase/s
 With that settled, the programmer added the test annotation and set about using it in their tests:
 
 
-```java
-package org.example.test;
+```diff
+diff -uN 02-reflection-invoke/Test.java 03-test-annotation/Test.java
+new file mode 100644
+--- Test.java      1970-01-01 00:00:00.000000000 +0000
++++ Test.java        2021-01-14 18:42:00.771000000 +0000
+@@ -0,0 +1,11 @@
++package org.example.test;
++
++import java.lang.annotation.ElementType;
++import java.lang.annotation.Retention;
++import java.lang.annotation.RetentionPolicy;
++import java.lang.annotation.Target;
++
++@Retention(RetentionPolicy.RUNTIME)
++@Target(ElementType.METHOD)
++public @interface Test {
++}
+diff -uN 02-reflection-invoke/IntCalculatorTest.java 03-test-annotation/IntCalculatorTest.java
+--- IntCalculatorTest.java 2021-01-24 19:28:40.346808600 +0000
++++ IntCalculatorTest.java   2021-01-24 19:28:56.170386600 +0000
+@@ -1,12 +1,16 @@
+ package org.example.app;
 
-import ...;
++import org.example.test.Test;
++
+ public class IntCalculatorTest {
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Test {
-}
-```
- 
-```java
-package org.example.app;
++  @Test
+   public void testSum() {
+     IntCalculator intCalculator = new IntCalculator();
+     assertEquals(2, intCalculator.sum(1, 1));
+   }
 
-import org.example.test.Test;
-
-public class IntCalculatorFirstAnnotationTest {
-    @Test
-    void testSum() {
-        IntCalculator intCalculator = new IntCalculator();
-        assertEquals(2, intCalculator.sum(1, 1));
-    }
-
-    @Test
-    void testMinus() {
-        IntCalculator intCalculator = new IntCalculator();
-        assertEquals(0, intCalculator.minus(1, 1));
-    }
-
-    public void assertEquals(int expected, int actual) {
-        if (expected != actual) {
-            throw new RuntimeException(String.format("%d != %d", 0, actual));
-        }
-    }
-}
++  @Test
+   public void testMinus() {
+     IntCalculator intCalculator = new IntCalculator();
+     assertEquals(0, intCalculator.minus(1, 1));
 ```
 
 Now, it was time to update the test runner. After going back to the [Method Javadoc](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html) 
 the programmer decided that [`isAnnotationPresent()`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/AccessibleObject.html#isAnnotationPresent(java.lang.Class)) 
 could be used to replace the check for a test method:
 
-```java
-public class TestRunner {
-    public static void main(String[] args) throws InvocationTargetException {
-        IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
+```diff
+diff -uN 02-reflection-invoke/TestRunner.java 03-test-annotation/TestRunner.java
+--- 02-reflection-invoke/TestRunner.java        2021-01-24 19:29:24.901621600 +0000
++++ 03-test-annotation/TestRunner.java  2021-01-24 19:40:35.800716600 +0000
+@@ -8,8 +8,7 @@
 
-        System.out.println("RUNNING - IntCalculatorFirstAnnotationTest");
-
-        for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
-            String testMethodName = declaredMethod.getName();
-            if (declaredMethod.isAnnotationPresent(Test.class)) {
-                try {
-                    declaredMethod.invoke(testInstance);
-                    System.out.println(String.format("PASSED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
-                } catch (InvocationTargetException e) {
-                    if (e.getTargetException() instanceof RuntimeException) {
-                        System.out.println(String.format("FAILED - IntCalculatorFirstAnnotationTest#%s", testMethodName));
-                    } else {
-                        throw e;
-                    }
-                }
-            }
-        }
-    }
-}
+     for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
+       String testMethodName = declaredMethod.getName();
+-      if (testMethodName.startsWith("test")) {
+-        // We've found a test method
++      if (declaredMethod.isAnnotationPresent(Test.class)) {
+         try {
+           declaredMethod.invoke(testInstance);
+           System.out.println(String.format("PASSED - IntCalculatorTest#%s", testMethodName));
 ```
 
 The programmer stood back and admired their work; they were definitely getting somewhere. The test runner was
@@ -285,70 +277,90 @@ the name of the test class in the RUNNING/PASSED/FAILED test logs.
 
 Next, since the programmer had used [`Class#getSimpleName()`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html#getSimpleName()) before, they decided to tidy up the test result logging.
 
-```java
-public class TestRunner {
-    public static void main(String[] args) throws InvocationTargetException {
-        IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
+```diff
+diff -uN 03-test-annotation/TestRunner.java 04-tidy-logging/TestRunner.java
+--- TestRunner.java  2021-01-24 19:29:31.943647100 +0000
++++ TestRunner.java     2021-01-24 19:30:16.774400600 +0000
+@@ -4,17 +4,18 @@
+   public static void main(String[] args) {
+     IntCalculatorTest intCalculatorTest = new IntCalculatorTest();
 
-        final String testClassName = testInstance.getClass().getSimpleName();
-        System.out.println("RUNNING - " + testClassName);
+-    System.out.println("RUNNING - IntCalculatorTest");
++    final String testClassName = testInstance.getClass().getSimpleName();
++    System.out.println("RUNNING - " + testClassName);
 
-        for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
-            String testMethodName = declaredMethod.getName();
-            if (declaredMethod.isAnnotationPresent(Test.class)) {
-                try {
-                    declaredMethod.invoke(testInstance);
-                    System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
-                } catch (InvocationTargetException e) {
-                    if (e.getTargetException() instanceof RuntimeException) {
-                        System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
-                    } else {
-                        throw e;
-                    }
-                }
-            }
-        }
-    }
-}
+     for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
+       String testMethodName = declaredMethod.getName();
+       if (declaredMethod.isAnnotationPresent(Test.class)) {
+         try {
+           declaredMethod.invoke(testInstance);
+-          System.out.println(String.format("PASSED - IntCalculatorTest#%s", testMethodName));
++          System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
+         } catch (InvocationTargetException e) {
+           if (e.getTargetException() instanceof RuntimeException) {
+-            System.out.println(String.format("FAILED - IntCalculatorTest#%s", testMethodName));
++            System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
+           } else {
+             throw e;
+           }
+
 ```
 
 Following this refactoring, the programmer could extract the test into two methods to prove that the code they had written
 was independent of `IntCalculatorFirstAnnotationTest`:
 
-```java
-public class TestRunner {
-    public static void main(String[] args) throws InvocationTargetException {
-        IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
+```diff
+diff -uN 04-tidy-logging/TestRunner.java 05-extract-methods/TestRunner.java
+--- TestRunner.java     2021-01-24 19:30:16.774400600 +0000
++++ TestRunner.java  2021-01-24 19:30:46.805758500 +0000
+@@ -1,25 +1,33 @@
+ package org.example.app;
 
-        runTest(testInstance);
-    }
+ public class TestRunner {
+-  public static void main(String[] args) {
+-    IntCalculatorTest intCalculatorTest = new IntCalculatorTest();
++  public static void main(String[] args) throws InvocationTargetException {
++    IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
 
-    private void runTest(Object testInstance) throws InvocationTargetException {
-        final String testClassName = testInstance.getClass().getSimpleName();
-        System.out.println("RUNNING - " + testClassName);
++    runTest(testInstance);
++  }
++
++  private void runTest(Object testInstance) throws InvocationTargetException {
+     final String testClassName = testInstance.getClass().getSimpleName();
+     System.out.println("RUNNING - " + testClassName);
 
-        for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
-            if (declaredMethod.isAnnotationPresent(Test.class)) {
-                runTestMethod(testInstance, testClassName, declaredMethod);
-            }
-        }
-    }
+     for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
+-      String testMethodName = declaredMethod.getName();
+       if (declaredMethod.isAnnotationPresent(Test.class)) {
+-        try {
+-          declaredMethod.invoke(testInstance);
+-          System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
+-        } catch (InvocationTargetException e) {
+-          if (e.getTargetException() instanceof RuntimeException) {
+-            System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
+-          } else {
+-            throw e;
+-          }
+-        }
++        runTestMethod(testInstance, testClassName, declaredMethod);
++      }
++    }
++  }
++
++  private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws InvocationTargetException {
++    String testMethodName = declaredMethod.getName();
++    try {
++      declaredMethod.invoke(testInstance);
++      System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
++    } catch (InvocationTargetException e) {
++      if (e.getTargetException() instanceof RuntimeException) {
++        System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
++      } else {
++        throw e;
+       }
+     }
+   }
 
-    private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws InvocationTargetException {
-        String testMethodName = declaredMethod.getName();
-        try {
-            declaredMethod.invoke(testInstance);
-            System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
-        } catch (InvocationTargetException e) {
-            if (e.getTargetException() instanceof RuntimeException) {
-                System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
-            } else {
-                throw e;
-            }
-        }
-    }
-
-}
 ```
 
 
@@ -360,82 +372,60 @@ one last look at their tests...
 The programmer couldn't quite put their finger on it but there was something wrong with their tests, they just 
 didn't look "modern".
 
-```java
-    @Test
-    public void testSum() {
-        //...
-    }
+```java     
+public class IntCalculatorTest {
+  @Test
+  public void testSum() {
+    //...
+  }
+}
 ```
 
 In a flash, the programmer saw the problem; access modifiers are so 2006. Surely the gauche `public` modifier could
 be removed. Since the programmer wanted to modify the accessibility of a method they had a look though the [Method Javadoc](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html)
-and discovered a promising method; [Method#setAccessible(boolean)](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html#setAccessible(boolean)):
-  
+and discovered a promising method; 
+> [Method#setAccessible(boolean)](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html#setAccessible(boolean)):  
 > Set the accessible flag for this reflected object to the indicated boolean value. A value of true indicates that the reflected object should suppress checks for Java language access control when it is used.
 
 
 Sure enough, once the `runTestMethod` was updated to call `declaredMethod.setAccessible(true)`, the public keyword could be
 removed from the tests:
 
-```java
-public class TestRunner {
+```diff
+diff -uN 05-extract-methods/TestRunner.java 06-remove-repetition/TestRunner.java
+--- TestRunner.java  2021-01-24 19:30:46.805758500 +0000
++++ TestRunner.java  2021-01-24 19:31:28.178498700 +0000
+@@ -21,6 +21,9 @@
+   private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws InvocationTargetException {
+     String testMethodName = declaredMethod.getName();
+     try {
++      if (!declaredMethod.canAccess(testInstance)) {
++        declaredMethod.setAccessible(true);
++      }
+       declaredMethod.invoke(testInstance);
+       System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
+     } catch (InvocationTargetException e) {
+diff -uN 05-extract-methods/IntCalculatorTest.java 06-remove-repetition/IntCalculatorTest.java
+--- IntCalculatorTest.java   2021-01-24 19:28:56.170000000 +0000
++++ IntCalculatorTest.java 2021-01-24 19:31:43.329204000 +0000
+@@ -5,13 +5,13 @@
+ public class IntCalculatorTest {
 
-    public static void main(String[] args) throws InvocationTargetException {
-        IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
+   @Test
+-  public void testSum() {
++  void testSum() {
+     IntCalculator intCalculator = new IntCalculator();
+     assertEquals(2, intCalculator.sum(1, 1));
+   }
 
-        runTest(testInstance);
-    }
-
-    private void runTest(Object testInstance) throws InvocationTargetException {
-       // ...
-    }
-
-    private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws InvocationTargetException {
-        String testMethodName = declaredMethod.getName();
-        try {
-            if (!declaredMethod.canAccess(testInstance)) {
-                declaredMethod.setAccessible(true);
-            }
-            declaredMethod.invoke(testInstance);
-            System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
-        } catch (InvocationTargetException e) {
-            if (e.getTargetException() instanceof RuntimeException) {
-                System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
-            } else {
-                throw e;
-            }
-        }
-    }
-
-}
+   @Test
+-  public void testMinus() {
++  void testMinus() {
+     IntCalculator intCalculator = new IntCalculator();
+     assertEquals(0, intCalculator.minus(1, 1));
+   }
 ```
 
-```java
-package org.example.app;
-
-import org.example.test.Test;
-
-public class IntCalculatorFirstAnnotationTest {
-
-    @Test
-    void testSum() {
-        IntCalculator intCalculator = new IntCalculator();
-        assertEquals(2, intCalculator.sum(1, 1));
-    }
-
-    @Test
-    void testMinus() {
-        IntCalculator intCalculator = new IntCalculator();
-        assertEquals(0, intCalculator.minus(1, 1));
-    }
-
-    public void assertEquals(int expected, int actual) {
-        if (expected != actual) {
-            throw new RuntimeException(String.format("%d != %d", 0, actual));
-        }
-    }
-}
-```
 
 
 
@@ -462,7 +452,7 @@ be able to use the stacktrace to explore the framework code that is invoking you
 Since the framework in question is JUnit 5, let's place a breakpoint in a test from a recent project (I would encourage 
 you to try the same). In a recent [Advent of Code](https://github.com/jphalford/advent-of-code) project, I get the following (the breakpoint is [here](https://github.com/jphalford/advent-of-code/blob/main/src/test/java/com/jphalford/aoc/day10/Day10Test.java#L57))
 
-```
+```shell-session
 part2Example1:58, Day10Test (com.jphalford.aoc.day10)
 invoke0:-1, NativeMethodAccessorImpl (jdk.internal.reflect)
 invoke:62, NativeMethodAccessorImpl (jdk.internal.reflect)
@@ -481,7 +471,7 @@ main:53, JUnitStarter (com.intellij.rt.junit)
 ```
  
 Let's look at the first few lines:
-```
+```shell-session
 part2Example1:58, Day10Test (com.jphalford.aoc.day10)
 invoke0:-1, NativeMethodAccessorImpl (jdk.internal.reflect)
 invoke:62, NativeMethodAccessorImpl (jdk.internal.reflect)
@@ -495,21 +485,28 @@ From the trace of the methods in between, it looks like it's using the same `inv
 
 Let's look closer at the `invokeMethod` method:
 ```java
-/**
-	 * @see org.junit.platform.commons.support.ReflectionSupport#invokeMethod(Method, Object, Object...)
-	 */
-	public static Object invokeMethod(Method method, Object target, Object... args) {
-		Preconditions.notNull(method, "Method must not be null");
-		Preconditions.condition((target != null || isStatic(method)),
-			() -> String.format("Cannot invoke non-static method [%s] on a null target.", method.toGenericString()));
+public class ReflectionUtils {   
+  //...
 
-		try {
-			return makeAccessible(method).invoke(target, args);
-		}
-		catch (Throwable t) {
-			throw ExceptionUtils.throwAsUncheckedException(getUnderlyingCause(t));
-		}
-	}
+  /**
+   * @see org.junit.platform.commons.support.ReflectionSupport#invokeMethod(Method, Object, Object...)
+   */
+  public static Object invokeMethod(Method method, Object target, Object... args) {
+    Preconditions.notNull(method, "Method must not be null");
+    Preconditions.condition((target != null || isStatic(method)),
+      () -> String.format("Cannot invoke non-static method [%s] on a null target.", method.toGenericString()));
+  
+    try {
+      return makeAccessible(method).invoke(target, args);
+    }
+    catch (Throwable t) {
+      throw ExceptionUtils.throwAsUncheckedException(getUnderlyingCause(t));
+    }
+  }  
+  
+  //...
+
+}
 ```
 
 Once we get past the `Preconditions` checks validating the method arguments the pattern followed by
@@ -519,34 +516,40 @@ However, the core principles are the same.
 
 Further down the stacktrace, we can find the primary method responsible for running a test:
 
-```
+```shell-session
 invokeTestMethod:206, TestMethodTestDescriptor (org.junit.jupiter.engine.descriptor)
 ```
 
 ```java
-    @Override
-	public JupiterEngineExecutionContext execute(JupiterEngineExecutionContext context,
-			DynamicTestExecutor dynamicTestExecutor) {
-		ThrowableCollector throwableCollector = context.getThrowableCollector();
+public class TestMethodTestDescriptor {
+  //...
+    
+  @Override
+  public JupiterEngineExecutionContext execute(JupiterEngineExecutionContext context,
+          DynamicTestExecutor dynamicTestExecutor) {
+    ThrowableCollector throwableCollector = context.getThrowableCollector();
 
-		// @formatter:off
-		invokeBeforeEachCallbacks(context);
-			if (throwableCollector.isEmpty()) {
-				invokeBeforeEachMethods(context);
-				if (throwableCollector.isEmpty()) {
-					invokeBeforeTestExecutionCallbacks(context);
-					if (throwableCollector.isEmpty()) {
-						invokeTestMethod(context, dynamicTestExecutor);
-					}
-					invokeAfterTestExecutionCallbacks(context);
-				}
-				invokeAfterEachMethods(context);
-			}
-		invokeAfterEachCallbacks(context);
-		// @formatter:on
+    // @formatter:off
+    invokeBeforeEachCallbacks(context);
+      if (throwableCollector.isEmpty()) {
+        invokeBeforeEachMethods(context);
+          if (throwableCollector.isEmpty()) {
+            invokeBeforeTestExecutionCallbacks(context);
+              if (throwableCollector.isEmpty()) {
+                invokeTestMethod(context, dynamicTestExecutor);
+              }
+            invokeAfterTestExecutionCallbacks(context);
+          }
+        invokeAfterEachMethods(context);
+      }
+    invokeAfterEachCallbacks(context);
+    // @formatter:on
 
-		return context;
-	}
+    return context;
+  }
+
+  // ...
+}
 ```
 
 Here, you can see the methods annotated with `@Before` being invoked (`invokeBeforeEachMethods()`) prior to the test

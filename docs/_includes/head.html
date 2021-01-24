@@ -36,7 +36,8 @@
         .d2h-wrapper td {
             margin: revert;
             padding: revert;
-            border: revert;
+            border-top: revert;
+            border-bottom: revert;
         }
 
         .d2h-wrapper tbody {
@@ -48,7 +49,8 @@
     hljs.initHighlightingOnLoad();
 
     document.addEventListener('DOMContentLoaded', () => {
-        const configuration = { drawFileList: false, matching: 'lines', highlight: 'true' };
+        // , outputFormat: 'side-by-side'
+        const configuration = { drawFileList: false, matching: 'none', highlight: 'true' };
         const elements = document.getElementsByClassName('language-diff')
         console.log('Found Elements ' + elements);
         while (elements.length > 0) {
