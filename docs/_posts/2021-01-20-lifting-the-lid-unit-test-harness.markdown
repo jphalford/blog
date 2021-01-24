@@ -39,50 +39,75 @@ that for their tests, a test would be represented by a method in a test class an
 passed if no exceptions are thrown when invoking the test method.  
  
 Half an hour later, and the programmer had some basic tests for sum and minus: 
- 
-`IntCalculatorTest`
-```java
-package org.example.app;
 
-public class IntCalculatorInitialTest {
-    public void testSum() {
-        IntCalculator intCalculator = new IntCalculator();
-        assertEquals(2, intCalculator.sum(1, 1));
-    }
+```diff
+diff --git a/IntCalculatorInitialTest.java b/IntCalculatorInitialTest.java 
+new file mode 100644
+--- /dev/null                        
++++ IntCalculatorInitialTest.java       
+@@ -0,0 +1,40 @@
++package org.example.app;
++
++public class IntCalculatorInitialTest {
++
++    public static void main(String[] args) {
++        IntCalculatorInitialTest intCalculatorTest = new IntCalculatorInitialTest();
++
++        System.out.println("IntCalculatorTest");
++
++        try {
++            intCalculatorTest.testSum();
++            System.out.println("PASSED - IntCalculatorTest#testSum");
++        } catch (Exception e) {
++            System.out.println("FAILED - IntCalculatorTest#testSum");
++        }
++
++        try {
++            intCalculatorTest.testMinus();
++            System.out.println("PASSED - IntCalculatorTest#testMinus");
++        } catch (Exception e) {
++            System.out.println("FAILED - IntCalculatorTest#testMinus");
++        }
++    }
++
++    public void testSum() {
++        IntCalculator intCalculator = new IntCalculator();
++        assertEquals(2, intCalculator.sum(1, 1));
++    }
++
++    public void testMinus() {
++        IntCalculator intCalculator = new IntCalculator();
++        assertEquals(0, intCalculator.minus(1, 1));
++    }
++
++    public void assertEquals(int expected, int actual) {
++        if (expected != actual) {
++            throw new RuntimeException(String.format("%d != %d", 0, actual));
++        }
++    }
++}
 
-    public void testMinus() {
-        IntCalculator intCalculator = new IntCalculator();
-        assertEquals(0, intCalculator.minus(1, 1));
-    }
-
-    public void assertEquals(int expected, int actual) {
-        if (expected != actual) {
-            throw new RuntimeException(String.format("%d != %d", 0, actual));
-        }
-    }
-}
 ```
 
 Alongside a test runner which would call each test method and print out pass or fail depending on whether the
 test method thew an exception:
-
-`TestRunner`
+`
 ```java
 package org.example.app;
 
 public class TestRunner {
-    public static void main(String[] args) {
-        IntCalculatorInitialTest intCalculatorTest = new IntCalculatorInitialTest();
-
+  public static void main(String[] args) {
+    IntCalculatorInitialTest intCalculatorTest = new IntCalculatorInitialTest();
+    
         System.out.println("IntCalculatorTest");
-
+        
         try {
             intCalculatorTest.testSum();
             System.out.println("PASSED - IntCalculatorTest#testSum");
         } catch (Exception e) {
             System.out.println("FAILED - IntCalculatorTest#testSum");
         }
-
+        
         try {
             intCalculatorTest.testMinus();
             System.out.println("PASSED - IntCalculatorTest#testMinus");
@@ -93,7 +118,7 @@ public class TestRunner {
 }
 ```
 
-`Output`
+
 ```
 RUNNING - IntCalculatorFirstAnnotationTest
 PASSED - IntCalculatorFirstAnnotationTest#testSum
@@ -132,7 +157,6 @@ in the test results
 In a jiffy, the test runner was transformed:
 ```java
 public class TestRunner {
-
     public static void main(String[] args) throws InvocationTargetException {
         IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
 
@@ -187,7 +211,7 @@ or [any other places an annotation can be used](https://docs.oracle.com/javase/s
 
 With that settled, the programmer added the test annotation and set about using it in their tests:
 
-`Test`
+
 ```java
 package org.example.test;
 
@@ -199,14 +223,12 @@ public @interface Test {
 }
 ```
  
-`IntCalculatorTest`
 ```java
 package org.example.app;
 
 import org.example.test.Test;
 
 public class IntCalculatorFirstAnnotationTest {
-
     @Test
     void testSum() {
         IntCalculator intCalculator = new IntCalculator();
@@ -233,7 +255,6 @@ could be used to replace the check for a test method:
 
 ```java
 public class TestRunner {
-
     public static void main(String[] args) throws InvocationTargetException {
         IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
 
@@ -266,7 +287,6 @@ Next, since the programmer had used [`Class#getSimpleName()`](https://docs.oracl
 
 ```java
 public class TestRunner {
-
     public static void main(String[] args) throws InvocationTargetException {
         IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
 
@@ -297,7 +317,6 @@ was independent of `IntCalculatorFirstAnnotationTest`:
 
 ```java
 public class TestRunner {
-
     public static void main(String[] args) throws InvocationTargetException {
         IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
 
@@ -391,7 +410,6 @@ public class TestRunner {
 }
 ```
 
-`IntCalculatorTest`
 ```java
 package org.example.app;
 

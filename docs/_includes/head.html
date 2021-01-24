@@ -1,0 +1,64 @@
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {%- seo -%}
+    <link rel="stylesheet" href="{{ "/assets/main.css" | relative_url }}" />
+    {%- feed_meta -%}
+    {%- if jekyll.environment == 'production' and site.google_analytics -%}
+    {%- include google-analytics.html -%}
+    {%- endif -%}
+
+    <!-- diff2html -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/diff2html/bundles/js/diff2html-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css" />
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+
+
+    <style type="text/css">
+        .d2h-wrapper table {
+            margin: revert;
+            border: revert;
+        }
+
+        .d2h-wrapper tr {
+            margin: revert;
+            border: revert;
+        }
+
+        .d2h-wrapper tr:nth-child(even) {
+            background-color: revert;
+        }
+
+        .d2h-wrapper td {
+            margin: revert;
+            padding: revert;
+            border: revert;
+        }
+
+        .d2h-wrapper tbody {
+            margin: revert;
+        }
+    </style>
+
+    <script>
+    hljs.initHighlightingOnLoad();
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const configuration = { drawFileList: false, matching: 'lines', highlight: 'true' };
+        const elements = document.getElementsByClassName('language-diff')
+        console.log('Found Elements ' + elements);
+        while (elements.length > 0) {
+          const diffElement = elements[0];
+          const diff2HtmlElement = document.createElement("div");
+          const diff = diffElement.innerHTML;
+          diffElement.parentNode.parentNode.replaceChild(diff2HtmlElement, diffElement.parentNode);
+          const diff2htmlUi = new Diff2HtmlUI(diff2HtmlElement, diff, configuration);
+          diff2htmlUi.draw();
+        }
+    });
+    </script>
+</head>

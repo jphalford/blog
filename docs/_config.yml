@@ -21,9 +21,9 @@
 title: jphalford
 #email: your-email@example.com
 description: >- # this means to ignore newlines until "baseurl:"
-  Software Developer working in London
-baseurl: "/lifting-the-lid" # the subpath of your site, e.g. /blog
-url: "https://jphalford.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+  A Software Developer based in Hampshire, working in London.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
 author: James Halford
 twitter_username: JPHalford
@@ -39,6 +39,9 @@ theme: minima
 plugins:
   - jekyll-feed
 
+kramdown:
+  syntax_highlighter_opts:
+    disable : true
 
 # Exclude from processing.
 # The following items will not be processed, by default.
