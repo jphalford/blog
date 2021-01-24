@@ -22,7 +22,7 @@ title: jphalford
 #email: your-email@example.com
 description: >- # this means to ignore newlines until "baseurl:"
   A Software Developer based in Hampshire, working in London.
-baseurl: "" # the subpath of your site, e.g. /blog
+baseurl: "/lifting-the-lid" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
 author: James Halford
