@@ -105,7 +105,7 @@ new file mode 100644
 
 Triggering the test runner, the programmer recieved the following output:
 
-```shell-session
+```shell
 RUNNING - IntCalculatorFirstAnnotationTest
 PASSED - IntCalculatorFirstAnnotationTest#testSum
 FAILED - IntCalculatorFirstAnnotationTest#testMinus
@@ -452,7 +452,7 @@ be able to use the stacktrace to explore the framework code that is invoking you
 Since the framework in question is JUnit 5, let's place a breakpoint in a test from a recent project (I would encourage 
 you to try the same). In a recent [Advent of Code](https://github.com/jphalford/advent-of-code) project, I get the following (the breakpoint is [here](https://github.com/jphalford/advent-of-code/blob/main/src/test/java/com/jphalford/aoc/day10/Day10Test.java#L57))
 
-```shell-session
+```shell
 part2Example1:58, Day10Test (com.jphalford.aoc.day10)
 invoke0:-1, NativeMethodAccessorImpl (jdk.internal.reflect)
 invoke:62, NativeMethodAccessorImpl (jdk.internal.reflect)
@@ -471,7 +471,7 @@ main:53, JUnitStarter (com.intellij.rt.junit)
 ```
  
 Let's look at the first few lines:
-```shell-session
+```shell
 part2Example1:58, Day10Test (com.jphalford.aoc.day10)
 invoke0:-1, NativeMethodAccessorImpl (jdk.internal.reflect)
 invoke:62, NativeMethodAccessorImpl (jdk.internal.reflect)
@@ -516,7 +516,7 @@ However, the core principles are the same.
 
 Further down the stacktrace, we can find the primary method responsible for running a test:
 
-```shell-session
+```shell
 invokeTestMethod:206, TestMethodTestDescriptor (org.junit.jupiter.engine.descriptor)
 ```
 
