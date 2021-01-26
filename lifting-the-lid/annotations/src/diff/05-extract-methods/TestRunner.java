@@ -1,13 +1,13 @@
 package org.example.app;
 
 public class TestRunner {
-  public static void main(String[] args) throws InvocationTargetException {
-    IntCalculatorTest testInstance = new IntCalculatorTest();
+  public static void main(String[] args) throws Exception {
+    IntCalculatorTest intCalculatorTest = new IntCalculatorTest();
 
-    runTest(testInstance);
+    runTest(intCalculatorTest);
   }
 
-  private void runTest(Object testInstance) throws InvocationTargetException {
+  private void runTest(Object testInstance) throws Exception {
     final String testClassName = testInstance.getClass().getSimpleName();
     System.out.println("RUNNING - " + testClassName);
 
@@ -18,7 +18,7 @@ public class TestRunner {
     }
   }
 
-  private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws InvocationTargetException {
+  private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws Exception {
     String testMethodName = declaredMethod.getName();
     try {
       declaredMethod.invoke(testInstance);

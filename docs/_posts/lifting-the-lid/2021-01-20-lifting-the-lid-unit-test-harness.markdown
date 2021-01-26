@@ -28,7 +28,9 @@ less time interpreting error messages and fixing your coding errors. Ultimately,
 in the debugger and orient yourself within these frameworks.  
 
 
-# Unit Testing Frameworks (Annotations and Reflection)
+# Unit Testing Frameworks (Annotations and Reflection
+
+If you would like to follow along, the initial project and final solution are available at [jphalford/lifting-the-lid-unit-testing-framework](https://github.com/jphalford/lifting-the-lid-unit-testing-framework).
 
 ## A Custom Solution
 
@@ -283,10 +285,10 @@ diff -uN 03-test-annotation/TestRunner.java 04-tidy-logging/TestRunner.java
 --- TestRunner.java  2021-01-24 19:29:31.943647100 +0000
 +++ TestRunner.java     2021-01-24 19:30:16.774400600 +0000
 @@ -4,17 +4,18 @@
-   public static void main(String[] args) {
+   public static void main(String[] args) throws Exception {
      IntCalculatorTest intCalculatorTest = new IntCalculatorTest();
 
--    System.out.println("RUNNING - IntCalculatorTest");
+-    System.out.println("IntCalculatorTest");
 +    final String testClassName = testInstance.getClass().getSimpleName();
 +    System.out.println("RUNNING - " + testClassName);
 
@@ -297,33 +299,26 @@ diff -uN 03-test-annotation/TestRunner.java 04-tidy-logging/TestRunner.java
            declaredMethod.invoke(testInstance);
 -          System.out.println(String.format("PASSED - IntCalculatorTest#%s", testMethodName));
 +          System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
-         } catch (Exception e) {
+         } catch (InvocationTargetException e) {
            if (e.getTargetException() instanceof RuntimeException) {
 -            System.out.println(String.format("FAILED - IntCalculatorTest#%s", testMethodName));
 +            System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
            } else {
              throw e;
            }
-
 ```
 
 Following this refactoring, the programmer could extract the test into two methods to prove that the code they had written
 was independent of `IntCalculatorFirstAnnotationTest`:
 
 ```diff
-diff -uN 04-tidy-logging/TestRunner.java 05-extract-methods/TestRunner.java
 --- TestRunner.java     2021-01-24 19:30:16.774400600 +0000
-+++ TestRunner.java  2021-01-24 19:30:46.805758500 +0000
-@@ -1,25 +1,33 @@
- package org.example.app;
++++ TestRunner.java  2021-01-24 19:40:35.810692200 +0000
+@@ -4,22 +4,30 @@
+   public static void main(String[] args) throws Exception {
+     IntCalculatorTest intCalculatorTest = new IntCalculatorTest();
 
- public class TestRunner {
--  public static void main(String[] args) {
--    IntCalculatorTest intCalculatorTest = new IntCalculatorTest();
-+  public static void main(String[] args) throws Exception {
-+    IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
-
-+    runTest(testInstance);
++    runTest(intCalculatorTest);
 +  }
 +
 +  private void runTest(Object testInstance) throws Exception {
@@ -336,7 +331,7 @@ diff -uN 04-tidy-logging/TestRunner.java 05-extract-methods/TestRunner.java
 -        try {
 -          declaredMethod.invoke(testInstance);
 -          System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
--        } catch (Exception e) {
+-        } catch (InvocationTargetException e) {
 -          if (e.getTargetException() instanceof RuntimeException) {
 -            System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
 -          } else {
@@ -353,7 +348,7 @@ diff -uN 04-tidy-logging/TestRunner.java 05-extract-methods/TestRunner.java
 +    try {
 +      declaredMethod.invoke(testInstance);
 +      System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
-+    } catch (Exception e) {
++    } catch (InvocationTargetException e) {
 +      if (e.getTargetException() instanceof RuntimeException) {
 +        System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
 +      } else {
@@ -363,6 +358,9 @@ diff -uN 04-tidy-logging/TestRunner.java 05-extract-methods/TestRunner.java
    }
 
 ```
+
+> Note that in the `runTest` and `runTestMethod` methods, there are no references to `IntCalculatorTest`.
+> These methods are now independent of our application code and tests and could be moved elsewhere (such as a dedicated test libary).
 
 Finally, the programmer decided to look at the instantiation of the test class itself via `new IntCalculatorFirstAnnotationTest()`.
 If reflection could be used to invoke a method, surely it could be used to invoke a constructor. The programmer revisited the 
@@ -377,16 +375,19 @@ would then be used to invoke the constructor
 diff -uN 05-extract-methods/TestRunner.java 06-extract-constructor/TestRunner.java
 --- TestRunner.java  2021-01-24 19:40:35.810692200 +0000
 +++ TestRunner.java      2021-01-26 18:07:50.481474100 +0000
-@@ -2,7 +2,8 @@
+@@ -2,9 +2,10 @@
 
  public class TestRunner {
    public static void main(String[] args) throws Exception {
--    IntCalculatorTest testInstance = new IntCalculatorTest();
+-    IntCalculatorTest intCalculatorTest = new IntCalculatorTest();
 +    Class<?> testClass = Class.forName("org.example.app.IntCalculatorTest");
 +    Object testInstance = testClass.getDeclaredConstructor().newInstance();
 
-     runTest(testInstance);
+-    runTest(intCalculatorTest);
++    runTest(testInstance);
    }
+
+   private void runTest(Object testInstance) throws Exception {
 
 ``` 
 
@@ -427,7 +428,7 @@ removed from the tests:
 diff -uN 05-extract-methods/TestRunner.java 06-remove-repetition/TestRunner.java
 --- TestRunner.java  2021-01-24 19:30:46.805758500 +0000
 +++ TestRunner.java  2021-01-24 19:31:28.178498700 +0000
-@@ -21,6 +21,9 @@
+@@ -22,6 +22,9 @@
    private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws Exception {
      String testMethodName = declaredMethod.getName();
      try {
@@ -436,7 +437,7 @@ diff -uN 05-extract-methods/TestRunner.java 06-remove-repetition/TestRunner.java
 +      }
        declaredMethod.invoke(testInstance);
        System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
-     } catch (Exception e) {
+     } catch (InvocationTargetException e) {
 diff -uN 05-extract-methods/IntCalculatorTest.java 06-remove-repetition/IntCalculatorTest.java
 --- IntCalculatorTest.java   2021-01-24 19:28:56.170000000 +0000
 +++ IntCalculatorTest.java 2021-01-24 19:31:43.329204000 +0000
@@ -607,6 +608,9 @@ This string can be used by the JUnit framework to instantiate the test class in 
 We've seen how to write a basic unit testing library and compared that with the approaches taken in an established framework.
 The language features used are not unique to unit testing frameworks and can be seen across a wide range of frameworks.
 Hopefully, this will help lift the lid on the mechanics of these and inspire you to explore them further.  
+
+If you would like to try to implement your own test harness, or would like to see the final solution in one place, you can find the project at 
+[jphalford/lifting-the-lid-unit-testing-framework](https://github.com/jphalford/lifting-the-lid-unit-testing-framework).
 
 I'm planning further articles on Dependency Injection frameworks (e.g. Spring beans), Lombok and the Classpath. If you 
 would like to see articles on a particular subject, get in contact!
