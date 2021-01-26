@@ -2,7 +2,8 @@ package org.example.app;
 
 public class TestRunner {
   public static void main(String[] args) throws InvocationTargetException {
-    IntCalculatorTest testInstance = new IntCalculatorTest();
+    Class<?> testClass = Class.forName("org.example.app.IntCalculatorTest");
+    Object testInstance = testClass.getDeclaredConstructor().newInstance();
 
     runTest(testInstance);
   }

@@ -168,7 +168,7 @@ diff -uN 01-initial/TestRunner.java 02-reflection-invoke/TestRunner.java
 +        try {
 +          declaredMethod.invoke(testInstance);
 +          System.out.println(String.format("PASSED - IntCalculatorTest#%s", testMethodName));
-+        } catch (InvocationTargetException e) {
++        } catch (Exception e) {
 +          if (e.getTargetException() instanceof RuntimeException) {
 +            System.out.println(String.format("FAILED - IntCalculatorTest#%s", testMethodName));
 +          } else {
@@ -182,7 +182,7 @@ diff -uN 01-initial/TestRunner.java 02-reflection-invoke/TestRunner.java
 
 ```
 
-> TODO - A brief explainer on InvocationTargetException
+> TODO - A brief explainer on Exception
 >
 
 
@@ -296,7 +296,7 @@ diff -uN 03-test-annotation/TestRunner.java 04-tidy-logging/TestRunner.java
            declaredMethod.invoke(testInstance);
 -          System.out.println(String.format("PASSED - IntCalculatorTest#%s", testMethodName));
 +          System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
-         } catch (InvocationTargetException e) {
+         } catch (Exception e) {
            if (e.getTargetException() instanceof RuntimeException) {
 -            System.out.println(String.format("FAILED - IntCalculatorTest#%s", testMethodName));
 +            System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
@@ -319,13 +319,13 @@ diff -uN 04-tidy-logging/TestRunner.java 05-extract-methods/TestRunner.java
  public class TestRunner {
 -  public static void main(String[] args) {
 -    IntCalculatorTest intCalculatorTest = new IntCalculatorTest();
-+  public static void main(String[] args) throws InvocationTargetException {
++  public static void main(String[] args) throws Exception {
 +    IntCalculatorFirstAnnotationTest testInstance = new IntCalculatorFirstAnnotationTest();
 
 +    runTest(testInstance);
 +  }
 +
-+  private void runTest(Object testInstance) throws InvocationTargetException {
++  private void runTest(Object testInstance) throws Exception {
      final String testClassName = testInstance.getClass().getSimpleName();
      System.out.println("RUNNING - " + testClassName);
 
@@ -335,7 +335,7 @@ diff -uN 04-tidy-logging/TestRunner.java 05-extract-methods/TestRunner.java
 -        try {
 -          declaredMethod.invoke(testInstance);
 -          System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
--        } catch (InvocationTargetException e) {
+-        } catch (Exception e) {
 -          if (e.getTargetException() instanceof RuntimeException) {
 -            System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
 -          } else {
@@ -347,12 +347,12 @@ diff -uN 04-tidy-logging/TestRunner.java 05-extract-methods/TestRunner.java
 +    }
 +  }
 +
-+  private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws InvocationTargetException {
++  private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws Exception {
 +    String testMethodName = declaredMethod.getName();
 +    try {
 +      declaredMethod.invoke(testInstance);
 +      System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
-+    } catch (InvocationTargetException e) {
++    } catch (Exception e) {
 +      if (e.getTargetException() instanceof RuntimeException) {
 +        System.out.println(String.format("FAILED - %s#%s", testClassName, testMethodName));
 +      } else {
@@ -362,6 +362,37 @@ diff -uN 04-tidy-logging/TestRunner.java 05-extract-methods/TestRunner.java
    }
 
 ```
+
+Finally, the programmer decided to look at the instantiation of the test class itself via `new IntCalculatorFirstAnnotationTest()`.
+If reflection could be used to invoke a method, surely it could be used to invoke a constructor. The programmer revisited the 
+[Class Javadoc](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html):
+1. [`Class#getDeclaredConstructor()`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html#getDeclaredConstructor()) would be used
+to obtain the default (i.e. no arguments) constructor.  
+1. [`Constructor#newInstance()`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html#invoke(java.lang.Object,java.lang.Object...)) 
+would then be used to invoke the constructor
+
+
+```diff
+diff -uN 05-extract-methods/TestRunner.java 06-extract-constructor/TestRunner.java
+--- TestRunner.java  2021-01-24 19:40:35.810692200 +0000
++++ TestRunner.java      2021-01-26 18:07:50.481474100 +0000
+@@ -2,7 +2,8 @@
+
+ public class TestRunner {
+   public static void main(String[] args) throws Exception {
+-    IntCalculatorTest testInstance = new IntCalculatorTest();
++    Class<?> testClass = Class.forName("org.example.app.IntCalculatorTest");
++    Object testInstance = testClass.getDeclaredConstructor().newInstance();
+
+     runTest(testInstance);
+   }
+
+``` 
+
+> A `Constructor` is not the same as a `Method` and has its own type in Java. If our constructor had arguments, or the
+> Test class had multiple constructors, the desired constructor can be retrieved by passing its argument types into
+> `Class#getDeclaredConstructor()` and argument values into `Class#newInstance()`.
+ 
 
 
 It was approaching afternoon tea and with the smell of scones heavy in the air the programmer decided to have
@@ -396,7 +427,7 @@ diff -uN 05-extract-methods/TestRunner.java 06-remove-repetition/TestRunner.java
 --- TestRunner.java  2021-01-24 19:30:46.805758500 +0000
 +++ TestRunner.java  2021-01-24 19:31:28.178498700 +0000
 @@ -21,6 +21,9 @@
-   private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws InvocationTargetException {
+   private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws Exception {
      String testMethodName = declaredMethod.getName();
      try {
 +      if (!declaredMethod.canAccess(testInstance)) {
@@ -404,7 +435,7 @@ diff -uN 05-extract-methods/TestRunner.java 06-remove-repetition/TestRunner.java
 +      }
        declaredMethod.invoke(testInstance);
        System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
-     } catch (InvocationTargetException e) {
+     } catch (Exception e) {
 diff -uN 05-extract-methods/IntCalculatorTest.java 06-remove-repetition/IntCalculatorTest.java
 --- IntCalculatorTest.java   2021-01-24 19:28:56.170000000 +0000
 +++ IntCalculatorTest.java 2021-01-24 19:31:43.329204000 +0000
@@ -510,7 +541,7 @@ public class ReflectionUtils {
 ```
 
 Once we get past the `Preconditions` checks validating the method arguments the pattern followed by
-our programmer emerges; the method is made accessible, invoked and the `InvocationTargetException` is handled. 
+our programmer emerges; the method is made accessible, invoked and the `Exception` is handled. 
 In the JUnit 5 implementation the responsibility to report the test lies elsewhere in the framework. 
 However, the core principles are the same. 
 
@@ -562,20 +593,20 @@ Finally, if we look at the initial main function in the debugger we can see how 
 args = {String[3]@1945}
        0 = "-ideVersion5"
        1 = "-junit5"
-       2 = "com.jphalford.aoc.day10.Day10Test,part2Example1"
+       2 = "com.jphalford.aoc.day10.Day10Test"
 ```
 
-TODO add/link back to forName?
+In the third parameter (index 2) we can see the class containing the tests to be run (`com.jphalford.aoc.day10.Day10Test`). 
+This string can be used by the JUnit framework to instantiate the test class in the same manner our programmer used above.
 
-## Other ideas
-- Dependency Injection
-- Lombok
-- The Classpath (use java cmd directly, maybe construct classpath as per maven/gradle for tests)
 
-## Q's
-- Annotation type member example for class name?
-- Generic Test Runner section?
-    - I think leave to The Classpath - add a teaser
-    - use forName + getDeclaredConstructor to initialise the test class
-    - demonstrate that no compile time reference so can be moved out of the source set
-    - acutally prob need as it ties in nicely with the final main look
+
+### Conclusion
+
+We've seen how to write a basic unit testing library and compared that with the approaches taken in an established framework.
+The language features used are not unique to unit testing frameworks and can be seen across a wide range of frameworks.
+Hopefully, this will help lift the lid on the mechanics of these and inspire you to explore them further.  
+
+I'm planning further articles on Dependency Injection frameworks (e.g. Spring beans), Lombok and the Classpath. If you 
+would like to see articles on a particular subject, get in contact!
+

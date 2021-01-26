@@ -23,7 +23,9 @@ diff -uN 04-tidy-logging/ 05-extract-methods/
 
 
 echo -e "\n05/06\n"
-diff -uN 05-extract-methods/ 06-remove-repetition/
+diff -uN 05-extract-methods/ 06-extract-constructor/
 
+echo -e "\n06/07\n"
+diff -uN 06-extract-constructor/ 07-remove-repetition/
 
 echo "add \"new file mode 100644\" for new files after diff generated and remove prefix"

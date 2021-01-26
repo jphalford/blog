@@ -65,7 +65,7 @@
         while (elements.length > 0) {
           const diffElement = elements[0];
           const diff2HtmlElement = document.createElement("div");
-          const diff = diffElement.innerHTML;
+          const diff = diffElement.innerText;
           diffElement.parentNode.parentNode.replaceChild(diff2HtmlElement, diffElement.parentNode);
           const diff2htmlUi = new Diff2HtmlUI(diff2HtmlElement, diff, configuration);
           diff2htmlUi.draw();
