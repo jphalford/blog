@@ -148,7 +148,13 @@ In a jiffy, the test runner was transformed:
 diff -uN 01-initial/TestRunner.java 02-reflection-invoke/TestRunner.java
 --- TestRunner.java  2021-01-24 19:02:53.483116100 +0000
 +++ TestRunner.java  2021-01-24 19:10:19.243665900 +0000
-@@ -6,18 +6,21 @@
+@@ -1,23 +1,26 @@
+ package org.example.app;
+
+ public class TestRunner {
+-  public static void main(String[] args) {
++  public static void main(String[] args) throws Exception {
+     IntCalculatorTest intCalculatorTest = new IntCalculatorTest();
 
      System.out.println("IntCalculatorTest");
 
@@ -171,7 +177,7 @@ diff -uN 01-initial/TestRunner.java 02-reflection-invoke/TestRunner.java
 +        try {
 +          declaredMethod.invoke(testInstance);
 +          System.out.println(String.format("PASSED - IntCalculatorTest#%s", testMethodName));
-+        } catch (Exception e) {
++        } catch (InvocationTargetException e) {
 +          if (e.getTargetException() instanceof RuntimeException) {
 +            System.out.println(String.format("FAILED - IntCalculatorTest#%s", testMethodName));
 +          } else {
@@ -182,11 +188,15 @@ diff -uN 01-initial/TestRunner.java 02-reflection-invoke/TestRunner.java
      }
    }
  }
-
 ```
 
-> TODO - A brief explainer on Exception
+> n.b. In the code above, when we `invoke` a method we must handle the three checked exceptions declared by the `invoke`
+> method. One of the exceptions is of particular interest; `InvocationTargetException`. 
 >
+> If the method that we `invoke`
+> throws an exception (such as the `RuntimeException` thrown when a test fails) then the JVM will create an `InvocationTargetException` to "wrap" the thrown exception. By inspecting `getTargetException` we can retrieve the "wrapped" exception and
+> determine whether it was expected (i.e. a `RuntimeException`) and if so, mark the test as failed.
+ 
 
 
 The programmer was a lot happier, now they could add further test methods, and as long as they started
