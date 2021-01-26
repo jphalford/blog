@@ -17,59 +17,6 @@
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
 
-
-    <style type="text/css">
-        .d2h-wrapper table {
-            margin: revert;
-            border: revert;
-        }
-
-        .d2h-wrapper tr {
-            margin: revert;
-            border: revert;
-        }
-
-        .d2h-wrapper tr:nth-child(even) {
-            background-color: revert;
-        }
-
-        .d2h-wrapper td {
-            margin: revert;
-            padding: revert;
-            border-top: revert;
-            border-bottom: revert;
-        }
-
-        .d2h-wrapper tbody {
-            margin: revert;
-        }
-
-        pre {
-          padding: 0.25em 0.5em;
-          background-color: rgb(248, 248, 248);
-        }
-
-        code {
-          background-color: rgb(248, 248, 248);
-        }
-    </style>
-
-    <script>
-    hljs.initHighlightingOnLoad();
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // , outputFormat: 'side-by-side'
-        const configuration = { drawFileList: false, matching: 'none', highlight: 'true' };
-        const elements = document.getElementsByClassName('language-diff')
-        console.log('Found Elements ' + elements);
-        while (elements.length > 0) {
-          const diffElement = elements[0];
-          const diff2HtmlElement = document.createElement("div");
-          const diff = diffElement.innerText;
-          diffElement.parentNode.parentNode.replaceChild(diff2HtmlElement, diffElement.parentNode);
-          const diff2htmlUi = new Diff2HtmlUI(diff2HtmlElement, diff, configuration);
-          diff2htmlUi.draw();
-        }
-    });
-    </script>
+    <link rel="stylesheet" href="{{ "/assets/css/override-minima-theme.css" | relative_url }}">
+    <script src="{{ "/assets/js/convert-diff-code.js" | relative_url }}"></script>
 </head>

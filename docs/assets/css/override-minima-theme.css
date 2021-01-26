@@ -1,0 +1,33 @@
+.d2h-wrapper table {
+    margin: revert;
+    border: revert;
+}
+
+.d2h-wrapper tr {
+    margin: revert;
+    border: revert;
+}
+
+.d2h-wrapper tr:nth-child(even) {
+    background-color: revert;
+}
+
+.d2h-wrapper td {
+    margin: revert;
+    padding: revert;
+    border-top: revert;
+    border-bottom: revert;
+}
+
+.d2h-wrapper tbody {
+    margin: revert;
+}
+
+pre {
+  padding: 0.25em 0.5em;
+  background-color: rgb(248, 248, 248);
+}
+
+code {
+  background-color: rgb(248, 248, 248);
+}

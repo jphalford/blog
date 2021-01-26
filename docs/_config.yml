@@ -21,7 +21,7 @@
 title: jphalford
 #email: your-email@example.com
 description: >- # this means to ignore newlines until "baseurl:"
-  A Software Developer based in Hampshire, working in London.
+  A human based in Hampshire, developing software in London.
 baseurl: "/lifting-the-lid" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
@@ -42,6 +42,7 @@ plugins:
 kramdown:
   syntax_highlighter_opts:
     disable : true
+show_excerpts: true
 
 # Exclude from processing.
 # The following items will not be processed, by default.

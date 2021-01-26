@@ -3,9 +3,10 @@ layout: post
 title:  "Lifting the Lid: Unit Testing Frameworks"
 date:   2021-01-20 20:18:13 +0000
 categories: lifting-the-lid java
----
+excerpt: >- 
+  Learn how to use Annotations and Reflection to write a basic Unit Testing Framework! 
 
-# Lifting the Lid
+---
 
 > "Just because you don't understand something doesn't mean that it's nonsense"
 >
@@ -27,9 +28,9 @@ less time interpreting error messages and fixing your coding errors. Ultimately,
 in the debugger and orient yourself within these frameworks.  
 
 
-## Lifting the Lid: Unit Testing Frameworks (Annotations and Reflection)
+# Unit Testing Frameworks (Annotations and Reflection)
 
-### A Custom Solution
+## A Custom Solution
 
 Once upon a time, there was a programmer who decided today was a good day to write a Java calculator application (it was 
 overcast with a westerly breeze). Keen to expand their craft, they decided to practice Test Driven Development. 
@@ -115,7 +116,7 @@ However, the programmer was frustrated. The calculator was going well, the test 
 but the test runner was a mess. Running a test and reporting the result required more lines of code than to specify the
 test and there was plenty of repetition; something had to change.
 
-#### Reflection
+### Reflection
 
 Luckily, the programmer had recently been browsing the [Java Reflection Tutorial](https://docs.oracle.com/javase/tutorial/reflect/index.html)
 and understood that the Reflection API allows the caller to examine properties of classes, their methods, fields etc
@@ -192,7 +193,7 @@ This wasn't a very flexible scheme, and the programmer wasn't sure they liked th
 names. Instead, it would be much better if there was a way to label the methods as tests. 
 
 
-#### Annotations to the Rescue
+### Annotations to the Rescue
 
 This sounded familiar, and sure enough after flicking through the Java Tutorials the programmer found the 
 [Annotations](https://docs.oracle.com/javase/tutorial/java/annotations/index.html) section. Annotations are 
@@ -257,8 +258,8 @@ could be used to replace the check for a test method:
 
 ```diff
 diff -uN 02-reflection-invoke/TestRunner.java 03-test-annotation/TestRunner.java
---- 02-reflection-invoke/TestRunner.java        2021-01-24 19:29:24.901621600 +0000
-+++ 03-test-annotation/TestRunner.java  2021-01-24 19:40:35.800716600 +0000
+--- TestRunner.java        2021-01-24 19:29:24.901621600 +0000
++++ TestRunner.java  2021-01-24 19:40:35.800716600 +0000
 @@ -8,8 +8,7 @@
 
      for (Method declaredMethod : testInstance.getClass().getDeclaredMethods()) {
@@ -398,7 +399,7 @@ diff -uN 05-extract-methods/TestRunner.java 06-extract-constructor/TestRunner.ja
 It was approaching afternoon tea and with the smell of scones heavy in the air the programmer decided to have
 one last look at their tests... 
 
-#### Removing repetition
+### Removing repetition
 
 The programmer couldn't quite put their finger on it but there was something wrong with their tests, they just 
 didn't look "modern".
@@ -460,7 +461,7 @@ diff -uN 05-extract-methods/IntCalculatorTest.java 06-remove-repetition/IntCalcu
 
 
 
-#### Epilogue
+### Epilogue
 
 As the days wore on, the programmer became obsessed with writing a fully featured test framework:
 - defining `@Before` and `@After` annotations and using the same techniques as above to 
@@ -473,7 +474,7 @@ difficult in Java and will probably be the subject of a future Lifting the Lid)
 With these features complete, they confidently proclaimed that this was indeed a superior test library.
 
 
-### JUnit 5
+## JUnit 5
 
 Now we have covered the basics of writing a test framework let's take a short look at a common java framework: JUnit 5.
 
@@ -597,11 +598,11 @@ args = {String[3]@1945}
 ```
 
 In the third parameter (index 2) we can see the class containing the tests to be run (`com.jphalford.aoc.day10.Day10Test`). 
-This string can be used by the JUnit framework to instantiate the test class in the same manner our programmer used above.
+This string can be used by the JUnit framework to instantiate the test class in the same manner as our programmer used above.
 
 
 
-### Conclusion
+# Conclusion
 
 We've seen how to write a basic unit testing library and compared that with the approaches taken in an established framework.
 The language features used are not unique to unit testing frameworks and can be seen across a wide range of frameworks.
