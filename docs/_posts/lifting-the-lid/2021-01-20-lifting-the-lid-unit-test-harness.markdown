@@ -405,7 +405,9 @@ diff -uN 05-extract-methods/TestRunner.java 06-extract-constructor/TestRunner.ja
 > Test class had multiple constructors, the desired constructor can be retrieved by passing its argument types into
 > `Class#getDeclaredConstructor()` and argument values into `Class#newInstance()`.
  
-
+With this complete, the programmer moved the test runner and annotation to a new package; `org.example.test`. Now 
+there were no references to the calculator test apart from the content of the string there didn't seem to be any need
+to keep the runner and the test together.
 
 It was approaching afternoon tea and with the smell of scones heavy in the air the programmer decided to have
 one last look at their tests... 
@@ -425,29 +427,8 @@ public class IntCalculatorTest {
 ```
 
 In a flash, the programmer saw the problem; access modifiers are so 2006. Surely the gauche `public` modifier could
-be removed. Since the programmer wanted to modify the accessibility of a method they had a look though the [Method Javadoc](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html)
-and discovered a promising method; 
-> [Method#setAccessible(boolean)](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html#setAccessible(boolean)):  
-> Set the accessible flag for this reflected object to the indicated boolean value. A value of true indicates that the reflected object should suppress checks for Java language access control when it is used.
-
-
-Sure enough, once the `runTestMethod` was updated to call `declaredMethod.setAccessible(true)`, the public keyword could be
-removed from the tests:
-
+be removed... 
 ```diff
-diff -uN 05-extract-methods/TestRunner.java 06-remove-repetition/TestRunner.java
---- TestRunner.java  2021-01-24 19:30:46.805758500 +0000
-+++ TestRunner.java  2021-01-24 19:31:28.178498700 +0000
-@@ -22,6 +22,9 @@
-   private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws Exception {
-     String testMethodName = declaredMethod.getName();
-     try {
-+      if (!declaredMethod.canAccess(testInstance)) {
-+        declaredMethod.setAccessible(true);
-+      }
-       declaredMethod.invoke(testInstance);
-       System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
-     } catch (InvocationTargetException e) {
 diff -uN 05-extract-methods/IntCalculatorTest.java 06-remove-repetition/IntCalculatorTest.java
 --- IntCalculatorTest.java   2021-01-24 19:28:56.170000000 +0000
 +++ IntCalculatorTest.java 2021-01-24 19:31:43.329204000 +0000
@@ -467,6 +448,44 @@ diff -uN 05-extract-methods/IntCalculatorTest.java 06-remove-repetition/IntCalcu
      IntCalculator intCalculator = new IntCalculator();
      assertEquals(0, intCalculator.minus(1, 1));
    }
+```
+
+On the next test run though there was a problem, the test runner exited and printed an error:
+```console
+Exception in thread "main" java.lang.IllegalAccessException: class org.example.test.TestRunner cannot access a member of class org.example.app.IntCalculatorTest with modifiers ""
+	at java.base/jdk.internal.reflect.Reflection.newIllegalAccessException(Reflection.java:361)
+	at java.base/java.lang.reflect.AccessibleObject.checkAccess(AccessibleObject.java:591)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:558)
+	at org.example.test.TestRunner.runTestMethod(TestRunner.java:31)
+	at org.example.test.TestRunner.runTest(TestRunner.java:20)
+	at org.example.test.TestRunner.main(TestRunner.java:11)
+```
+
+Maybe this wouldn't be so easy after all. The programmer thought of scones, sighed, and read the error out loud to his faithful rubber duck.
+
+Of course! the packages of the runner (`org.example.test`) and the test (`org.example.app`) were no longer the same. By removing the
+`public` modifier the methods had been declared as package private. Since the test runner was not in the same package as the test class
+it could not invoke the test class' methods. Rather than give up, the programmer had a look though the [Method Javadoc](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html)
+and discovered a promising method; 
+> [Method#setAccessible(boolean)](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html#setAccessible(boolean)):  
+> Set the accessible flag for this reflected object to the indicated boolean value. A value of true indicates that the reflected object should suppress checks for Java language access control when it is used.
+
+Sure enough, once the `runTestMethod` was updated to call `declaredMethod.setAccessible(true)`, the tests would run successfully:
+
+```diff
+diff -uN 05-extract-methods/TestRunner.java 06-remove-repetition/TestRunner.java
+--- TestRunner.java  2021-01-24 19:30:46.805758500 +0000
++++ TestRunner.java  2021-01-24 19:31:28.178498700 +0000
+@@ -22,6 +22,9 @@
+   private void runTestMethod(Object testInstance, String testClassName, Method declaredMethod) throws Exception {
+     String testMethodName = declaredMethod.getName();
+     try {
++      if (!declaredMethod.canAccess(testInstance)) {
++        declaredMethod.setAccessible(true);
++      }
+       declaredMethod.invoke(testInstance);
+       System.out.println(String.format("PASSED - %s#%s", testClassName, testMethodName));
+     } catch (InvocationTargetException e) {
 ```
 
 
