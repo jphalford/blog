@@ -1,3 +1,3 @@
-# Lifting the Lid
+# jphalford/blog
 
-Published to github pages: https://jphalford.github.io/lifting-the-lid/
+Published to [jphalford.com](https://jphalford.com)
