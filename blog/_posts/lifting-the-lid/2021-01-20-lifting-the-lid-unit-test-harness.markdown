@@ -2,10 +2,11 @@
 layout: post
 title:  "Lifting the Lid: Unit Testing Frameworks"
 date:   2021-01-20 20:18:13 +0000
-categories: lifting-the-lid java
+category: lifting-the-lid
+tags: java unit-testing
 excerpt: >- 
   Learn how to use Annotations and Reflection to write a basic Unit Testing Framework! 
-
+seo.type: TechArticle
 ---
 
 > "Just because you don't understand something doesn't mean that it's nonsense"
@@ -28,7 +29,7 @@ less time interpreting error messages and fixing your coding errors. Ultimately,
 in the debugger and orient yourself within these frameworks.  
 
 
-# Unit Testing Frameworks (Annotations and Reflection
+# Unit Testing Frameworks (Annotations and Reflection)
 
 If you would like to follow along, the initial project and final solution are available at [jphalford/lifting-the-lid-unit-testing-framework](https://github.com/jphalford/lifting-the-lid-unit-testing-framework).
 
@@ -37,9 +38,9 @@ If you would like to follow along, the initial project and final solution are av
 Once upon a time, there was a programmer who decided today was a good day to write a Java calculator application (it was 
 overcast with a westerly breeze). Keen to expand their craft, they decided to practice Test Driven Development. 
 
-The programmer was untrusting of others and thought Frameworks were for other people. They decided
-that for their tests, a test would be represented by a method in a test class and would be considered to have 
-passed if no exceptions are thrown when invoking the test method.  
+To do this, the programmer would need to be able to write and run tests. However, the programmer thought that Frameworks were 
+for other people. They decided that for their tests, a test would be represented by a method 
+in a test class and would be considered to have passed if no exceptions were thrown when invoking the test method.  
  
 Half an hour later, and the programmer had some basic tests for sum and minus: 
 
@@ -106,12 +107,12 @@ new file mode 100644
 
 ```
 
-Triggering the test runner, the programmer recieved the following output:
+Triggering the test runner, the programmer received the following output:
 
 ```shell
-RUNNING - IntCalculatorFirstAnnotationTest
-PASSED - IntCalculatorFirstAnnotationTest#testSum
-FAILED - IntCalculatorFirstAnnotationTest#testMinus
+RUNNING - IntCalculatorTest
+PASSED - IntCalculatorTest#testSum
+FAILED - IntCalculatorTest#testMinus
 ```
 
 However, the programmer was frustrated. The calculator was going well, the test results could be seen in the console, 
@@ -126,7 +127,7 @@ and even make changes to the original declarations of those classes and invoke t
 
 In particular:
 - [Class Javadoc](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html) - A `Class` instance is 
-created by the Java Virtual Machine (JVM) for each class that is loaded by the application; it can be accessed statically via `MyClass.class` or from
+created by the Java Virtual Machine (JVM) for each class loaded by the application; it can be accessed statically via `MyClass.class` or from
 an instance using the `getClass()` method provided by the top-level `Object` class. This is often used in application code simply to retrieve the class name for use by a logging framework.
 However, the `Class` class exposes a wealth of information about the declaration of the class provided by the programmer. 
 - [Method Javadoc](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/Method.html) A `Method` instance
@@ -208,9 +209,9 @@ names. Instead, it would be much better if there was a way to label the methods 
 ### Annotations to the Rescue
 
 This sounded familiar, and sure enough after flicking through the Java Tutorials the programmer found the 
-[Annotations](https://docs.oracle.com/javase/tutorial/java/annotations/index.html) section. Annotations are 
-used to provide metadata about the code and can be queried at runtime by an application. So the programmer decided 
-to create a `@Test` annotation to mark the test methods. Then, they could update their code to check for mehtods
+[Annotations](https://docs.oracle.com/javase/tutorial/java/annotations/index.html) section. Annotations provide metadata 
+about the code and can be queried at runtime by an application. So the programmer decided 
+to create a `@Test` annotation to mark the test methods. Then, they could update their code to check for methods
 with this annotation rather than starting with the word "test".
 
 Annotations are specified using the `@interface` keyword and can themselves have annotations applied to 
@@ -285,7 +286,7 @@ diff -uN 02-reflection-invoke/TestRunner.java 03-test-annotation/TestRunner.java
 ```
 
 The programmer stood back and admired their work; they were definitely getting somewhere. The test runner was
-almost independent of the test class being run. The only sticking points were the instantiation of `IntCalculatorFirstAnnotationTest` and
+almost independent of the test class being run. The only sticking points were the instantiation of `IntCalculatorTest` and
 the name of the test class in the RUNNING/PASSED/FAILED test logs.  
 
 Next, since the programmer had used [`Class#getSimpleName()`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html#getSimpleName()) before, they decided to tidy up the test result logging.
@@ -318,8 +319,8 @@ diff -uN 03-test-annotation/TestRunner.java 04-tidy-logging/TestRunner.java
            }
 ```
 
-Following this refactoring, the programmer could extract the test into two methods to prove that the code they had written
-was independent of `IntCalculatorFirstAnnotationTest`:
+Following this refactoring, the programmer could extract the test into two methods to demonstrate that the code they had written
+was independent of `IntCalculatorTest`:
 
 ```diff
 --- TestRunner.java     2021-01-24 19:30:16.774400600 +0000
@@ -372,7 +373,7 @@ was independent of `IntCalculatorFirstAnnotationTest`:
 > Note that in the `runTest` and `runTestMethod` methods, there are no references to `IntCalculatorTest`.
 > These methods are now independent of our application code and tests and could be moved elsewhere (such as a dedicated test libary).
 
-Finally, the programmer decided to look at the instantiation of the test class itself via `new IntCalculatorFirstAnnotationTest()`.
+Finally, the programmer decided to look at the instantiation of the test class itself via `new IntCalculatorTest()`.
 If reflection could be used to invoke a method, surely it could be used to invoke a constructor. The programmer revisited the 
 [Class Javadoc](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html):
 1. [`Class#getDeclaredConstructor()`](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html#getDeclaredConstructor()) would be used
@@ -407,7 +408,7 @@ diff -uN 05-extract-methods/TestRunner.java 06-extract-constructor/TestRunner.ja
  
 With this complete, the programmer moved the test runner and annotation to a new package; `org.example.test`. Now 
 there were no references to the calculator test apart from the content of the string there didn't seem to be any need
-to keep the runner and the test together.
+to keep the runner and test together.
 
 It was approaching afternoon tea and with the smell of scones heavy in the air the programmer decided to have
 one last look at their tests... 

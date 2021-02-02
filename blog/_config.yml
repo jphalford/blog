@@ -21,17 +21,28 @@
 title: jphalford
 #email: your-email@example.com
 description: >- # this means to ignore newlines until "baseurl:"
-  A human based in Hampshire, developing software in London.
+  Software Developer > Cook > Exerciser > Photographer
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://jphalford.com" # the base hostname & protocol for your site, e.g. http://example.com
 
+# Minima theme socials
 author: James Halford
-twitter_username: JPHalford
+twitter_username: jphalford
 github_username:  jphalford
 instagram_username:  jphalford86
 linkedin_username: jphalford
 
-permalink: /:title/
+# seo-tag socials
+social:
+  links:
+    - https://twitter.com/jphalford
+    - https://www.linkedin.com/in/jphalford
+    - https://github.com/jphalford
+    - https://instagram.com/jphalford86
+
+timezone: Europe/London
+
+permalink: /:categories/:title/
 
 
 # Build settings
